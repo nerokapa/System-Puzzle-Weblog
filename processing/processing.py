@@ -28,6 +28,15 @@ channel.queue_declare(queue='log-analysis')
 conn = psycopg2.connect(host='db', database=os.environ['POSTGRES_DB'], user=os.environ['POSTGRES_USER'], password=os.environ['POSTGRES_PASSWORD'])
 cur = conn.cursor()
 
+############# start : for debug ##############
+print("Info: db connection is completed, start printing the tables in db:")
+cur.execute("""SELECT table_name FROM information_schema.tables
+       WHERE table_schema = 'public'""")
+for table in cur.fetchall():
+    print(table)
+############# end : for debug ################
+
+
 
 # main function that reads from RabbitMQ queue and stores it in database
 def callback(ch, method, properties, body):

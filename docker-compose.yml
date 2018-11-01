@@ -5,7 +5,7 @@ services:
     volumes:
       - ./docker-entrypoint-initdb.d/init-tables.sh:/docker-entrypoint-initdb.d/init-tables.sh
     env_file:
-     - env_file
+      - env_file
     networks:
       - db_network
   flaskapp:
@@ -40,8 +40,6 @@ services:
     restart: on-failure
     depends_on:
       - rabbit
-    ports:
-     - "80:5672"
   processing:
     build: processing/.
     env_file:
@@ -52,12 +50,10 @@ services:
     restart: on-failure
     depends_on:
       - rabbit
-    ports:
-     - "81:5672"
   nginx:
     image: "nginx:1.13.5"
     ports:
-      - "80:8080"
+      - "80:80"
     volumes:
       - ./conf.d:/etc/nginx/conf.d
     networks:
