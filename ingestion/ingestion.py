@@ -3,6 +3,7 @@ import pika
 import json
 import os
 import time
+import sys
 from utils import parse_log, is_get_request
 
 #Connect  to RabbitMQ
@@ -28,26 +29,24 @@ channel.queue_declare(queue='log-analysis')
 
 # Read weblogs
 
-f = open('weblogs.log', 'r')
+with open('weblogs.log', 'r') as f:
+    while True:
+        try:
+            msg = f.readline()
+            if not msg:
+                break
+            #If message is GET request, ingest it into the queue
+            if is_get_request(msg):
+                # Parse GET request for relevant information
+                day, status, source = parse_log(msg)
 
-while True:
-    try:
-        msg = f.readline()
-
-        if not msg:
-            break
-        #If message is GET request, ingest it into the queue
-        if is_get_request(msg):
-            # Parse GET request for relevant information
-            day, status, source = parse_log(msg)
-
-            # Store in RabbitMQ
-            body = json.dumps({'day': str(day), 'status': status})
-            channel.basic_publish(exchange='',
-                                  routing_key='log-analysis',
-                                  body=body)
+                # Store in RabbitMQ
+                body = json.dumps({'day': str(day), 'status': status, 'source': source})
+                channel.basic_publish(exchange='',
+                                      routing_key='log-analysis',
+                                      body=body)
+            
+        except:
+            print("Unexpected error:" +  sys.exc_info()[0])
         
-    except:
-        print("Unexpected error:" +  sys.exc_info()[0])
-    
 connection.close()
