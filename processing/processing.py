@@ -27,9 +27,6 @@ channel.queue_declare(queue='log-analysis')
 conn = psycopg2.connect(host='db', database=os.environ['POSTGRES_DB'], user=os.environ['POSTGRES_USER'], password=os.environ['POSTGRES_PASSWORD'])
 cur = conn.cursor()
 
-cur.execute("Select * FROM weblogs")
-colnames = [desc[0] for desc in cur.description]
-print(colnames)
 # main function that reads from RabbitMQ queue and stores it in database
 def callback(ch, method, properties, body):
     msg = json.loads(body)
